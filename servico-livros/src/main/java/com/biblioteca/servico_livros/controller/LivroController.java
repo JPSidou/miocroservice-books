@@ -1,0 +1,67 @@
+package com.biblioteca.servico_livros.controller;
+
+import com.biblioteca.servico_livros.model.Livro;
+import com.biblioteca.servico_livros.service.LivroService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/livros")
+@CrossOrigin(origins = "*")
+public class LivroController {
+
+    @Autowired
+    private LivroService livroService;
+
+    // Endpoint: GET /livros -> Lista todos os livros
+    @GetMapping
+    public List<Livro> listarLivros() {
+        return livroService.listarTodos();
+    }
+
+    // Endpoint: GET /livros/{id} -> Busca um livro por ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Livro> buscarLivroPorId(@PathVariable String id) {
+        return livroService.buscarPorId(id)
+                .map(livro -> ResponseEntity.ok(livro))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Endpoint: POST /livros -> Adiciona um novo livro
+    @PostMapping
+    public ResponseEntity<Livro> adicionarLivro(@RequestBody Livro livro) {
+        Livro novoLivro = livroService.adicionarLivro(livro);
+        return ResponseEntity.status(HttpStatus.CREATED).body(novoLivro);
+    }
+    
+    // Endpoint: PATCH /livros/{id} -> Altera a disponibilidade
+    // Espera um corpo de requisição como: { "disponivel": false }
+    @PatchMapping("/{id}")
+    public ResponseEntity<Livro> alterarDisponibilidade(@PathVariable String id, @RequestBody Map<String, Boolean> updates) {
+        Boolean disponivel = updates.get("disponivel");
+        if (disponivel == null) {
+            return ResponseEntity.badRequest().build(); // Corpo da requisição inválido
+        }
+        
+        Optional<Livro> livroAtualizado = livroService.alterarDisponibilidade(id, disponivel);
+        return livroAtualizado
+                .map(livro -> ResponseEntity.ok(livro))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Endpoint: DELETE /livros/{id} -> Remove um livro
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> removerLivro(@PathVariable String id) {
+        if (livroService.removerLivro(id)) {
+            return ResponseEntity.noContent().build(); // Sucesso, sem conteúdo de retorno
+        }
+        // Isso pode acontecer se o livro não existe OU não está disponível
+        return ResponseEntity.notFound().build();
+    }
+}
