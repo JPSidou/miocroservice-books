@@ -32,7 +32,9 @@ public class LivroService {
         Optional<Livro> livroOptional = buscarPorId(id);
         if (livroOptional.isPresent()) {
             Livro livro = livroOptional.get();
-            livro.setDisponivel(disponivel);
+            if (livro.getQuantidade() == 0) {
+                livro.setDisponivel(disponivel);
+            }
             return Optional.of(livro);
         }
         return Optional.empty();
