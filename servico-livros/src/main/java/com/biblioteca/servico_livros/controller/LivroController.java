@@ -40,20 +40,19 @@ public class LivroController {
         return ResponseEntity.status(HttpStatus.CREATED).body(novoLivro);
     }
     
-    // Endpoint: PATCH /livros/{id} -> Altera a disponibilidade
-    // Espera um corpo de requisição como: { "disponivel": false }
+    // Endpoint: PATCH /livros/{id} -> Atualiza atributos do livro, como a quantidade.
+    // Espera um corpo de requisição como: { "quantidade": 5 }
     @PatchMapping("/{id}")
-    public ResponseEntity<Livro> alterarDisponibilidade(@PathVariable String id, @RequestBody Map<String, Boolean> updates) {
-        Boolean disponivel = updates.get("disponivel");
-        if (disponivel == null) {
-            return ResponseEntity.badRequest().build(); // Corpo da requisição inválido
-        }
-        
-        Optional<Livro> livroAtualizado = livroService.alterarDisponibilidade(id, disponivel);
-        return livroAtualizado
-                .map(livro -> ResponseEntity.ok(livro))
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Livro> atualizarLivro(@PathVariable String id, @RequestBody Map<String, Object> updates) {
+        if (updates.containsKey("quantidade")) {
+            int novaQuantidade = (Integer) updates.get("quantidade");
+            Optional<Livro> livroAtualizado = livroService.atualizarQuantidade(id, novaQuantidade);
+            return livroAtualizado
+                    .map(livro -> ResponseEntity.ok(livro))
+                    .orElse(ResponseEntity.notFound().build());
     }
+    return ResponseEntity.badRequest().build();
+}
         // Endpoint: GET /livros/{id}/disponivel -> Verifica se o livro está disponível
     @GetMapping("/{id}/disponivel")
     public ResponseEntity<Boolean> verificarDisponibilidade(@PathVariable String id) {

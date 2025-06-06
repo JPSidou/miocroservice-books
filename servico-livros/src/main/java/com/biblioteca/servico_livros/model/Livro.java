@@ -8,7 +8,7 @@ public class Livro {
     private int quantidade;
     private boolean disponivel;
     
-    public Livro(String id, String titulo, String autor, int anoPublicacao) {
+    public Livro(String id, String titulo, String autor, int anoPublicacao, int quantidade) {
         this.id = id;
         this.titulo = titulo;
         this.autor = autor;

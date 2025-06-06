@@ -28,17 +28,18 @@ public class LivroService {
                 .findFirst();
     }
     
-    public Optional<Livro> alterarDisponibilidade(String id, boolean disponivel) {
+    public Optional<Livro> atualizarQuantidade(String id, int novaQuantidade) {
         Optional<Livro> livroOptional = buscarPorId(id);
+
         if (livroOptional.isPresent()) {
             Livro livro = livroOptional.get();
-            if (livro.getQuantidade() == 0) {
-                livro.setDisponivel(disponivel);
-            }
+            livro.setQuantidade(novaQuantidade);
+            livro.setDisponivel(livro.getQuantidade() > 0);
             return Optional.of(livro);
-        }
-        return Optional.empty();
     }
+    
+        return Optional.empty();
+}
 
     public boolean removerLivro(String id) {
         return livros.removeIf(livro -> livro.getId().equals(id) && livro.isDisponivel());
