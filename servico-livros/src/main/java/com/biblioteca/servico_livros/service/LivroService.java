@@ -43,4 +43,11 @@ public class LivroService {
     public boolean removerLivro(String id) {
         return livros.removeIf(livro -> livro.getId().equals(id) && livro.isDisponivel());
     }
+
+    public boolean verificarDisponibilidade(String id) {
+        return buscarPorId(id)
+                .map(Livro::isDisponivel)
+                .orElse(false); // ou lançar exceção, se preferir
+    }
+
 }

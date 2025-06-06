@@ -54,6 +54,16 @@ public class LivroController {
                 .map(livro -> ResponseEntity.ok(livro))
                 .orElse(ResponseEntity.notFound().build());
     }
+        // Endpoint: GET /livros/{id}/disponivel -> Verifica se o livro está disponível
+    @GetMapping("/{id}/disponivel")
+    public ResponseEntity<Boolean> verificarDisponibilidade(@PathVariable String id) {
+        Optional<Livro> livro = livroService.buscarPorId(id);
+        if (livro.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        boolean disponivel = livro.get().isDisponivel();
+        return ResponseEntity.ok(disponivel);
+    }
 
     // Endpoint: DELETE /livros/{id} -> Remove um livro
     @DeleteMapping("/{id}")
@@ -64,4 +74,6 @@ public class LivroController {
         // Isso pode acontecer se o livro não existe OU não está disponível
         return ResponseEntity.notFound().build();
     }
+
+
 }
