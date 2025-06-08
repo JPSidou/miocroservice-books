@@ -1,6 +1,14 @@
 package com.biblioteca.servico_livros.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+
+
+@Document(collection = "livros")
 public class Livro {
+    
+    @Id
     private String id;
     private String titulo;
     private String autor;

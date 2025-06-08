@@ -1,54 +1,58 @@
-// Em src/main/java/com/biblioteca/servico_livros/service/LivroService.java
 package com.biblioteca.servico_livros.service;
 
 import com.biblioteca.servico_livros.model.Livro;
+import com.biblioteca.servico_livros.repository.LivroRepository; // Importe o repositório
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class LivroService {
 
-    private final List<Livro> livros = new ArrayList<>();
+    // Injetamos o repositório do MongoDB
+    @Autowired
+    private LivroRepository livroRepository;
 
     public Livro adicionarLivro(Livro novoLivro) {
-        livros.add(novoLivro);
-        return novoLivro;
+        // O método save cria se o ID é novo, ou atualiza se já existe
+        return livroRepository.save(novoLivro);
     }
 
     public List<Livro> listarTodos() {
-        return livros;
+        return livroRepository.findAll();
     }
 
     public Optional<Livro> buscarPorId(String id) {
-        return livros.stream()
-                .filter(livro -> livro.getId().equals(id))
-                .findFirst();
+        return livroRepository.findById(id);
     }
-    
-    public Optional<Livro> atualizarQuantidade(String id, int novaQuantidade) {
-        Optional<Livro> livroOptional = buscarPorId(id);
-
-        if (livroOptional.isPresent()) {
-            Livro livro = livroOptional.get();
-            livro.setQuantidade(novaQuantidade);
-            livro.setDisponivel(livro.getQuantidade() > 0);
-            return Optional.of(livro);
-    }
-    
-        return Optional.empty();
-}
 
     public boolean removerLivro(String id) {
-        return livros.removeIf(livro -> livro.getId().equals(id) && livro.isDisponivel());
+        Optional<Livro> livroOpt = livroRepository.findById(id);
+        if (livroOpt.isPresent()) {
+            Livro livro = livroOpt.get();
+            // Mantendo sua regra de negócio: só remove se disponível
+            if (livro.isDisponivel()) {
+                livroRepository.deleteById(id);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Método para ser chamado pelo serviço de aluguel
+    public Optional<Livro> atualizarQuantidade(String id, int novaQuantidade) {
+        return livroRepository.findById(id).map(livro -> {
+            livro.setQuantidade(novaQuantidade);
+            livro.setDisponivel(novaQuantidade > 0); // Disponibilidade é um reflexo da quantidade
+            return livroRepository.save(livro); // Salva o estado atualizado no banco
+        });
     }
 
     public boolean verificarDisponibilidade(String id) {
-        return buscarPorId(id)
+        return livroRepository.findById(id)
                 .map(Livro::isDisponivel)
-                .orElse(false); // ou lançar exceção, se preferir
+                .orElse(false);
     }
-
 }
